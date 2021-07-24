@@ -1,3 +1,4 @@
+from posts.utils import ObjectCreateMixin, ObjectDeleteMixin, ObjectUpdateMixin
 from django.utils.translation import activate
 from django.views import View
 from django.shortcuts import redirect, render, get_object_or_404, reverse
@@ -42,42 +43,20 @@ def post_detail_view(request, id):
                     'comments': comments,
                     'comment_form': comment_form})
 
-class PostCreateView(View):
+class PostCreateView(View, ObjectCreateMixin):
 
-    def get(self, request):
-        form = PostForm()
-        return render(request, 'posts/post_create.html', context={'form': form})
+    form = PostForm
+    template = 'posts/post_create.html'
 
-    def post(self, request):
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save()
-            return redirect(post)
-        return render(request, 'posts/post_create.html', context={'form': form})
+class PostUpdateView(View, ObjectUpdateMixin):
 
-class PostUpdateView(View):
+    obj_class = Post
+    template = 'posts/post_update.html'
+    form = PostForm
 
-    def get(self, request, id):
-        post = get_object_or_404(Post, id=id)
-        bound_form= PostForm(instance=post)
-        return render(request, 'posts/post_update.html', context={'form': bound_form, 'post': post})
+class PostDeleteView(View, ObjectDeleteMixin):
 
-    def post(self, request, id):
-        post = get_object_or_404(Post, id=id)
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            post = form.save()
-            return redirect(post)
-        return render(request, 'posts/post_update.html', context={'form': form, 'post': post})
-
-class PostDeleteView(View):
-
-    def get(self, request, id):
-        post = get_object_or_404(Post, id=id)
-        return render(request, 'posts/post_delete.html', context={'post': post})
-
-    def post(self, request, id):
-        post = get_object_or_404(Post, id=id)
-        post.delete()
-        return redirect(reverse('post_list_url'))
+    obj_class = Post
+    template = 'posts/post_delete.html'
+    obj_url = 'post_list_url'
 
