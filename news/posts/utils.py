@@ -16,19 +16,22 @@ class ObjectCreateMixin:
         return render(request, self.template, context={'form': form})
 
 class ObjectUpdateMixin:
-    bound_form = None
+    form = None
     obj_class = None
     template = None
 
     def get(self, request, id):
+        if not request.user.is_authenticated or request.user.role == 'ordinary':
+            return redirect(reverse('post_list_url'))
+
         obj = get_object_or_404(self.obj_class, id=id)
-        bound_form = self.bound_form(instance=obj)
+        bound_form = self.form(instance=obj)
         return render(request, self.template, context={'form': bound_form,
                                                                   self.obj_class.__name__.lower(): obj})
 
     def post(self, request, id):
         obj = get_object_or_404(self.obj_class, id=id)
-        bound_form = self.bound_form(request.POST, instance=obj)
+        bound_form = self.form(request.POST, instance=obj)
         if bound_form.is_valid():
             obj = bound_form.save()
             return redirect(obj)
@@ -41,6 +44,9 @@ class ObjectDeleteMixin:
     obj_url = None
 
     def get(self, request, id):
+        if not request.user.is_authenticated or request.user.role == 'ordinary':
+            return redirect(reverse('post_list_url'))
+
         obj = get_object_or_404(self.obj_class, id=id)
         return render(request, self.template, context={self.obj_class.__name__.lower(): obj})
 
