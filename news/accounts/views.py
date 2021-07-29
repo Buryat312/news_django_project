@@ -1,8 +1,7 @@
 from django.shortcuts import redirect, render, reverse
 from django.views import View
 from accounts.forms import LoginForm, RegistrationForm
-from django.contrib.auth import authenticate, login
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, login, get_user_model, logout
 
 class LoginView(View):
 
@@ -50,3 +49,7 @@ class RegistrationView(View):
             login(request, user)
             return redirect(reverse('post_list_url'))
         return render(request, 'accounts/registration.html', context={'registration_form':registration_form})
+
+def logout_view(request):
+    logout(request)
+    return redirect(reverse('post_list_url'))
