@@ -14,8 +14,10 @@
     <form action="." method="POST">
         {{ login_form.as_p }}
         {% csrf_token %}
-        <button title="Submit">Login</button>
+        <button title="Submit" class="btn btn-success">Login</button>
+        <a href="{% url 'registration_url' %}" class="btn btn-primary">Register</a>
     </form>
+
 <body>
 
 <html>
