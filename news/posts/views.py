@@ -5,12 +5,21 @@ from django.shortcuts import redirect, render, get_object_or_404, reverse
 from posts.models import Post
 from posts.forms import PostForm, SearchForm
 from comments.forms import CommentForm
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 
 def posts_list_view(request):
+    if not request.user.is_authenticated:
+        return redirect(reverse('login_url'))
+
     if request.method == 'GET':
-        posts = Post.objects.all()
+        if request.user.role == User.UserType.ORDINARY:
+            posts = request.user.posts.all()
+        else:
+            posts = Post.objects.all()
+
         return render(request,'posts/index.html',context={'posts': posts})
     elif request.method == 'POST':
         search_form = SearchForm(request.POST)
@@ -47,6 +56,7 @@ class PostCreateView(View, ObjectCreateMixin):
 
     form = PostForm
     template = 'posts/post_create.html'
+    has_author = True
 
 class PostUpdateView(View, ObjectUpdateMixin):
 
