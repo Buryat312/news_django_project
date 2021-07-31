@@ -7,7 +7,7 @@ class User(AbstractUser):
     class UserType(models.TextChoices):
         ADMIN = 'admin'
         EDITOR = 'editor'
-        ODINARY = 'ordinary'
+        ORDINARY = 'ordinary'
 
-    role = models.CharField(max_length=10, choices=UserType.choices, default=UserType.ODINARY)
+    role = models.CharField(max_length=10, choices=UserType.choices, default=UserType.ORDINARY)
  
