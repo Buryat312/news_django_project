@@ -1,9 +1,12 @@
 from django.db import models
 from django.shortcuts import reverse
+from django.contrib.auth import get_user_model
 
-# Create your models here.
+
+User = get_user_model()
 
 class Post(models.Model):
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='posts')
     title = models.CharField(max_length=128) #название таблицы
     body = models.TextField() #поле
     published_date = models.DateField(auto_now_add=True)
