@@ -1,11 +1,16 @@
-from posts.utils import ObjectCreateMixin, ObjectDeleteMixin, ObjectUpdateMixin
+from django.core import paginator
 from django.utils.translation import activate
 from django.views import View
 from django.shortcuts import redirect, render, get_object_or_404, reverse
+from django.core.paginator import Paginator
+from django.contrib.auth import get_user_model
+
+
 from posts.models import Post
 from posts.forms import PostForm, SearchForm
 from comments.forms import CommentForm
-from django.contrib.auth import get_user_model
+from posts.utils import ObjectCreateMixin, ObjectDeleteMixin, ObjectUpdateMixin
+
 
 User = get_user_model()
 
@@ -20,13 +25,38 @@ def posts_list_view(request):
         else:
             posts = Post.objects.all()
 
-        return render(request,'posts/index.html',context={'posts': posts})
+        page_number = request.GET.get('page', 1)
+        paginator = Paginator(posts, 3)
+        page = paginator.get_page(page_number)
+        posts = page.object_list
+
+        if page.has_next():
+            next_url = f'?page={page.number + 1}'
+        else:
+            next_url = f'?page={page.number}'
+
+        if page.has_previous():
+            previous_url = f'?page={page.number - 1}'
+        else:
+            previous_url = f'?page={page.number}'
+
+        context = {'page': page,
+                    'next_url': next_url,
+                    'previous_url': previous_url,}
+
+        return render(request,'posts/index.html',context=context)
+
+
+
+
     elif request.method == 'POST':
         search_form = SearchForm(request.POST)
         if search_form.is_valid():
             search_param = search_form.cleaned_data.get('search_param')
             filtered_posts = Post.objects.filter(title__icontains=search_param)
             return render(request, 'posts/index.html', context={'posts': filtered_posts})
+
+
 
 
 def post_detail_view(request, id):
